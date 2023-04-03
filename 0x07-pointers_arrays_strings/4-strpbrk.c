@@ -5,18 +5,18 @@
  * @accept: input
  * Return: Always 0 (Success)
  */
-char *_strpbrk(char *u, char *accept)
+char *_strpbrk(char *s, char *accept)
 {
 		int j;
 
-		while (*u)
+		while (*s)
 		{
 			for (j = 0; accept[j]; j++)
 			{
-			if (*u == accept[j])
-			return (u);
+			if (*s == accept[j])
+			return (s);
 			}
-		u++;
+		s++;
 		}
 
 	return ('\0');
