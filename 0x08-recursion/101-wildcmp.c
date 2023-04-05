@@ -2,42 +2,29 @@
 
 /**
  * wildcmp - Compare strings
- * @s85: pointer to string params
- * @s95: pointer to string params
+ * @s1: pointer to string params
+ * @s2: pointer to string params
  * Return: 0
  */
 
 int wildcmp(char *s1, char *s2)
 {
-	if (*s85 == '\0')
+	if (*s1 == '\0')
 	{
-		if (*s95 != '\0' && *s95 == '*')
+		if (*s2 != '\0' && *s2 == '*')
 		{
-			return (wildcmp(s85, s95 + 1));
+			return (wildcmp(s1, s2 + 1));
 		}
-		return (*s95 == '\0');
+		return (*s2 == '\0');
 	}
 
-	if (*s95 == '*')
+	if (*s2 == '*')
 	{
-		return (wildcmp(s85 + 1, s95) || wildcmp(s85, s95 + 1));
+		return (wildcmp(s1 + 1, s2) || wildcmp(s1, s2 + 1));
 	}
-	else if (*s85 == *s95)
+	else if (*s1 == *s2)
 	{
-		return (wildcmp(s85 + 1, s95 + 1));
+		return (wildcmp(s1 + 1, s2 + 1));
 	}
 	return (0);
-}
- * @f: number to calculate the sqaure root of
- * @g: iterator
- *
- * Return: the resulting square root
- */
-int actual_sqrt_recursion(int n, int b)
-{
-	if (g * g > f)
-		return (-1);
-	if (g * g == f)
-		return (g);
-	return (actual_sqrt_recursion(f, g + 1));
 }
