@@ -1,19 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include "main.h"
 
-#define BUF_SIZE 1024
+#define BUFFER_SIZE 1024
 
 /**
- * display_error - Displays an error message to the standard error.
- * @error_code: The error code.
- * @name_from: The name of the source file.
- * @name_to: The name of the destination file.
- * @fd_from: The file descriptor of the source file.
- *
- * Return: void
+ * display_error - Displays error messages to the standard error
+ * @error_code: The error code
+ * @name_from: The name of the source file
+ * @name_to: The name of the destination file
+ * @fd_from: The file descriptor of the source file
  */
 void display_error(int error_code, const char *name_from, const char *name_to, int fd_from)
 {
@@ -34,77 +32,85 @@ void display_error(int error_code, const char *name_from, const char *name_to, i
 		default:
 			break;
 	}
-	exit(error_code);
 }
 
 /**
- * copy_file - Copies the content of one file to another.
- * @name_from: The name of the source file.
- * @name_to: The name of the destination file.
- *
- * Return: void
+ * copy_file - Copies the content of one file to another
+ * @file_from: The name of the source file
+ * @file_to: The name of the destination file
+ * Return: 1 on success, -1 on failure
  */
-void copy_file(const char *name_from, const char *name_to)
+int copy_file(const char *file_from, const char *file_to)
 {
 	int fd_from, fd_to, bytes_read, bytes_written;
-	char buffer[BUF_SIZE];
+	char buffer[BUFFER_SIZE];
 
-	fd_from = open(name_from, O_RDONLY);
+	if (file_from == NULL)
+		return (-1);
+
+	fd_from = open(file_from, O_RDONLY);
 	if (fd_from == -1)
-		display_error(98, name_from, name_to, fd_from);
-
-	fd_to = open(name_to, O_CREAT | O_WRONLY | O_TRUNC, 0664);
-	if (fd_to == -1)
 	{
-		close(fd_from);
-		display_error(99, name_from, name_to, fd_from);
+		display_error(98, file_from, file_to, 0);
+		return (-1);
 	}
 
-	while ((bytes_read = read(fd_from, buffer, BUF_SIZE)) > 0)
+	fd_to = open(file_to, O_CREAT | O_WRONLY | O_TRUNC, 0664);
+	if (fd_to == -1)
+	{
+		display_error(99, file_from, file_to, fd_from);
+		close(fd_from);
+		return (-1);
+	}
+
+	while ((bytes_read = read(fd_from, buffer, BUFFER_SIZE)) > 0)
 	{
 		bytes_written = write(fd_to, buffer, bytes_read);
-		if (bytes_written == -1)
+		if (bytes_written == -1 || bytes_written != bytes_read)
 		{
+			display_error(99, file_from, file_to, fd_from);
 			close(fd_from);
 			close(fd_to);
-			display_error(99, name_from, name_to, fd_from);
+			return (-1);
 		}
 	}
 
 	if (bytes_read == -1)
 	{
+		display_error(98, file_from, file_to, fd_from);
 		close(fd_from);
 		close(fd_to);
-		display_error(98, name_from, name_to, fd_from);
+		return (-1);
 	}
 
 	if (close(fd_from) == -1)
-		display_error(100, name_from, name_to, fd_from);
+	{
+		display_error(100, file_from, file_to, fd_from);
+		close(fd_to);
+		return (-1);
+	}
 
 	if (close(fd_to) == -1)
-		display_error(100, name_from, name_to, fd_from);
+	{
+		display_error(100, file_from, file_to, fd_from);
+		return (-1);
+	}
+
+	return (1);
 }
 
 /**
- * main - Entry point of the program.
- * @argc: The number of command-line arguments.
- * @argv: An array containing the command-line arguments.
- *
- * Return: 0 on success, or the corresponding error code.
+ * main - Entry point
+ * @argc: The number of command line arguments
+ * @argv: An array of command line argument strings
+ * Return: 0 on success, or the corresponding error code on failure
  */
 int main(int argc, char *argv[])
 {
-	char *name_from, *name_to;
-
 	if (argc != 3)
 	{
 		display_error(97, NULL, NULL, 0);
+		return (97);
 	}
 
-	name_from = argv[1];
-	name_to = argv[2];
-
-	copy_file(name_from, name_to);
-
-	return (0);
-}
+	if (copy_file(argv[1],
