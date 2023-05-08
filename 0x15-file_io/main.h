@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include <fcntl.h>
+#include <elf.h>
 #include <sys/types.h>
 #include <unistd.h>  /* Include this header for ssize_t */
 
